@@ -1,0 +1,68 @@
+const express = require('express');
+const router = express.Router();
+const authMiddleware = require('../middleware/auth');
+
+let tasks = [];
+let goals = [];
+
+router.use(authMiddleware);
+
+// GET /getTasks
+router.get('/getTasks', (req, res) => {
+  res.status(200).json(tasks);
+});
+
+// GET /getGoals
+router.get('/getGoals', (req, res) => {
+  res.status(200).json(goals);
+});
+
+// POST /addTask
+router.post('/addTask', (req, res) => {
+  const { title, dueDate } = req.body;
+  if (!title || !dueDate) {
+    return res.status(400).json({ error: '400 - Bad Request: title y dueDate son requeridos' });
+  }
+  tasks.push({ id: Date.now(), title, dueDate });
+  res.status(200).json({ message: 'Tarea agregada correctamente' });
+});
+
+// POST /addGoal
+router.post('/addGoal', (req, res) => {
+  const { title, dueDate } = req.body;
+  if (!title || !dueDate) {
+    return res.status(400).json({ error: '400 - Bad Request: title y dueDate son requeridos' });
+  }
+  goals.push({ id: Date.now(), title, dueDate });
+  res.status(200).json({ message: 'Meta agregada correctamente' });
+});
+
+// DELETE /removeTask
+router.delete('/removeTask', (req, res) => {
+  const { id } = req.body;
+  if (!id) {
+    return res.status(400).json({ error: '400 - Bad Request: id es requerido para eliminar tarea' });
+  }
+  const initialLength = tasks.length;
+  tasks = tasks.filter(task => task.id !== id);
+  if (tasks.length === initialLength) {
+    return res.status(400).json({ error: '400 - Bad Request: tarea no encontrada con ese id' });
+  }
+  res.status(200).json({ message: 'Tarea eliminada correctamente' });
+});
+
+// DELETE /removeGoal
+router.delete('/removeGoal', (req, res) => {
+  const { id } = req.body;
+  if (!id) {
+    return res.status(400).json({ error: '400 - Bad Request: id es requerido para eliminar meta' });
+  }
+  const initialLength = goals.length;
+  goals = goals.filter(goal => goal.id !== id);
+  if (goals.length === initialLength) {
+    return res.status(400).json({ error: '400 - Bad Request: meta no encontrada con ese id' });
+  }
+  res.status(200).json({ message: 'Meta eliminada correctamente' });
+});
+
+module.exports = router;
